@@ -4,7 +4,7 @@
 
 Setelah menyelesaikan pembelajaran tentang Go API, Anda ditugaskan oleh manajemen Enigma Laundry (EL) untuk membuat sebuah aplikasi sederhana berbasis API untuk mencatat transaksi di tokonya.
 
-![logo](./aset/Enigma-Laundry.png)
+![logo](./asset/Enigma-Laundry.png)
 
 Fitur-fitur yang diminta oleh manajemen EL adalah:
 
@@ -46,9 +46,9 @@ Request :
 
 ```json
 {
-  "customerName": "string",
-  "customerPhoneNumber": "string",
-  "customerAddress": "string"
+  "name": "string",
+  "phoneNumber": "string",
+  "address": "string"
 }
 ```
 
@@ -59,12 +59,12 @@ Response :
 
 ```json
 {
-  "errors": "string",
+  "message": "string",
   "data": {
-    "customerId": "string",
-    "customerName": "string",
-    "customerPhoneNumber": "string",
-    "customerAddress": "string"
+    "id": "string",
+    "name": "string",
+    "phoneNumber": "string",
+    "address": "string"
   }
 }
 ```
@@ -85,12 +85,12 @@ Response :
 
 ```json
 {
-  "errors": "string",
+  "message": "string",
   "data": {
-    "customerId": "string",
-    "customerName": "string",
-    "customerPhoneNumber": "string",
-    "customerAddress": "string"
+    "id": "string",
+    "name": "string",
+    "phoneNumber": "string",
+    "address": "string"
   }
 }
 ```
@@ -108,9 +108,9 @@ Request :
 
 ```json
 {
-  "customerName": "string",
-  "customerPhoneNumber": "string",
-  "customerAddress": "string"
+  "name": "string",
+  "phoneNumber": "string",
+  "address": "string"
 }
 ```
 
@@ -121,12 +121,12 @@ Response :
 
 ```json
 {
-  "errors": "string",
+  "message": "string",
   "data": {
-    "customerId": "string",
-    "customerName": "string",
-    "customerPhoneNumber": "string",
-    "customerAddress": "string"
+    "id": "string",
+    "name": "string",
+    "phoneNumber": "string",
+    "address": "string"
   }
 }
 ```
@@ -148,7 +148,7 @@ Response :
 
 ```json
 {
-  "errors": "string",
+  "message": "string",
   "data": "OK"
 }
 ```
@@ -168,9 +168,9 @@ Request :
 
 ```json
 {
-	"productName": "string",
-    "productPrice": int,
-    "productUnit": "string" (satuan product,cth: Buah atau Kg)
+	"name": "string",
+  "price": int,
+  "unit": "string" (satuan product,cth: Buah atau Kg)
 }
 ```
 
@@ -181,12 +181,12 @@ Response :
 
 ```json
 {
-	"error": "string",
+	"message": "string",
 	"data": {
-		"productId": "string",
-		"productName": "string",
-		"productPrice": int,
-		"productUnit": "string" (satuan product,cth: Buah atau Kg)
+		"id": "string",
+		"name": "string",
+		"price": int,
+		"unit": "string" (satuan product,cth: Buah atau Kg)
 	}
 }
 ```
@@ -209,19 +209,19 @@ Response :
 
 ```json
 {
-	"error": "string",
+	"message": "string",
 	"data": [
 		{
-			"productId": "string",
-			"productName": "string",
-			"productPrice": int,
-			"productUnit": "string" (satuan product,cth: Buah atau Kg)
+			"id": "string",
+			"name": "string",
+			"price": int,
+			"unit": "string" (satuan product,cth: Buah atau Kg)
 		},
 		{
-			"productId": "string",
-			"productName": "string",
-			"productPrice": int,
-			"productUnit": "string" (satuan product,cth: Buah atau Kg)
+			"id": "string",
+			"name": "string",
+			"price": int,
+			"unit": "string" (satuan product,cth: Buah atau Kg)
 		}
 	]
 }
@@ -243,12 +243,12 @@ Response :
 
 ```json
 {
-	"error": "string",
+	"message": "string",
 	"data": {
-		"productId": "string",
-		"productName": "string",
-		"productPrice": int,
-		"productUnit": "string" (satuan product,cth: Buah atau Kg)
+		"id": "string",
+		"name": "string",
+		"price": int,
+		"unit": "string" (satuan product,cth: Buah atau Kg)
 	}
 }
 ```
@@ -266,9 +266,9 @@ Request :
 
 ```json
 {
-	"productName": "string",
-    "productPrice": int,
-    "productUnit": "string" (satuan product,cth: Buah atau Kg)
+	"name": "string",
+	"price": int,
+	"unit": "string" (satuan product,cth: Buah atau Kg)
 }
 ```
 
@@ -279,12 +279,12 @@ Response :
 
 ```json
 {
-	"error": "string",
+	"message": "string",
 	"data": {
-		"productId": "string",
-		"productName": "string",
-		"productPrice": int,
-		"productUnit": "string" (satuan product,cth: Buah atau Kg)
+		"id": "string",
+		"name": "string",
+		"price": int,
+		"unit": "string" (satuan product,cth: Buah atau Kg)
 	}
 }
 ```
@@ -306,7 +306,7 @@ Response :
 
 ```json
 {
-  "errors": "string",
+  "message": "string",
   "data": "OK"
 }
 ```
@@ -326,16 +326,16 @@ Request :
 
 ```json
 {
-	"BillDate": "string",
-	"EntryDate": "string",
-	"FinishDate": "string",
-	"EmployeeId": "string",
-	"CustomerId": "string",
-	"BillDetails": [
+	"billDate": "string",
+	"entryDate": "string",
+	"finishDate": "string",
+	"employeeId": "string",
+	"customerId": "string",
+	"billDetails": [
 		{
-			"ProductId": "string",
-			"ProductPrice": int,
-			"Qty": int
+			"productId": "string",
+			"productPrice": int,
+			"qty": int
 		}
 	]
 }
@@ -348,9 +348,9 @@ Request :
 
 ```json
 {
-	"error": "string",
+	"message": "string",
 	"data":  {
-		"billId":  "string",
+		"id":  "string",
 		"billDate":  "string",
 		"entryDate":  "string",
 		"finishDate":  "string",
@@ -358,7 +358,8 @@ Request :
 		"customerId":  "string",
 		"billDetails":  [
 			{
-				"billDetailsId":  "string",
+				"id":	"string",
+				"billId":  "string",
 				"productId":  "string",
 				"productPrice": int,
 				"qty": int
@@ -385,9 +386,9 @@ Response :
 
 ```json
 {
-	"error": "string",
+	"message": "string",
 	"data":  {
-		"billId":  "string",
+		"id":  "string",
 		"billDate":  "string",
 		"entryDate":  "string",
 		"finishDate":  "string",
@@ -395,7 +396,8 @@ Response :
 		"customerId":  "string",
 		"billDetails":  [
 			{
-				"billDetailsId":  "string",
+				"id":	"string",
+				"billId":  "string",
 				"productId":  "string",
 				"productPrice": int,
 				"qty": int
@@ -428,10 +430,10 @@ Response :
 
 ```json
 {
-	"error": "string",
+	"message": "string",
 	"data":  [
 		{
-			"billId":  "string",
+			"id":  "string",
 			"billDate":  "string",
 			"entryDate":  "string",
 			"finishDate":  "string",
@@ -439,7 +441,8 @@ Response :
 			"customerId":  "string",
 			"billDetails":  [
 				{
-					"billDetailsId":  "string",
+					"id":	"string",
+					"billId":  "string",
 					"productId":  "string",
 					"productPrice": int,
 					"qty": int
