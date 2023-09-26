@@ -20,9 +20,9 @@ Fitur-fitur yang diminta oleh manajemen EL adalah:
           1. Manajemen Customer
           2. Manajemen Produk
           3. Manajemen Employee
-        - Aplikasi memiliki menu untuk melakukan GET dan POST pada table Transaksi
+        - Aplikasi memiliki fitur untuk melakukan GET dan POST pada table Transaksi
           1. Manajemen Transaksi
-        - Setiap menu master wajib memiliki minimal 2 jenis validasi yang berbeda
+        - Setiap fitur master wajib memiliki minimal 2 jenis validasi yang berbeda
         - Setiap transaksi master wajib memiliki minimal 4 jenis validasi yang berbeda
 
 3.  Dokumentasi cara menjalankan aplikasi dan penggunaan aplikasi dalam bentuk readme.md atau dokumen ektensi word atau pdf
