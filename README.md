@@ -14,13 +14,13 @@ Fitur-fitur yang diminta oleh manajemen EL adalah:
         - Design database minimal memiliki 2 tabel master dan 1 tabel transaksi
         - Sediakan sample data dalam bentuk Script DML Postgre SQL
 
-2.  Aplikasi berbasis Console menggunakan bahasa pemrograman Golang dengan kriteria sbb :
+2.  Aplikasi berbasis API menggunakan bahasa pemrograman Golang dengan kriteria sbb :
 
-        - Aplikasi memiliki menu untuk melakukan VIEW, INSERT, UPDATE, dan DELETE pada tabel master
+        - Aplikasi memiliki fitur untuk melakukan GET, POST, PUT, dan DELETE pada tabel master
           1. Manajemen Customer
           2. Manajemen Produk
           3. Manajemen Employee
-        - Aplikasi memiliki menu untuk melakukan VIEW dan INSERT pada table Transaksi
+        - Aplikasi memiliki menu untuk melakukan GET dan POST pada table Transaksi
           1. Manajemen Transaksi
         - Setiap menu master wajib memiliki minimal 2 jenis validasi yang berbeda
         - Setiap transaksi master wajib memiliki minimal 4 jenis validasi yang berbeda
@@ -334,7 +334,6 @@ Request :
 	"billDetails": [
 		{
 			"productId": "string",
-			"productPrice": int,
 			"qty": int
 		}
 	]
@@ -387,23 +386,39 @@ Response :
 ```json
 {
 	"message": "string",
-	"data":  {
-		"id":  "string",
-		"billDate":  "string",
-		"entryDate":  "string",
-		"finishDate":  "string",
-		"employeeId":  "string",
-		"customerId":  "string",
-		"billDetails":  [
-			{
-				"id":	"string",
-				"billId":  "string",
-				"productId":  "string",
-				"productPrice": int,
-				"qty": int
-			}
-		]
-	}
+  "data": {
+    "id": "string",
+    "billDate": "string",
+    "entryDate": "string",
+    "finishDate": "string",
+    "employee": {
+      "id": "string",
+      "name": "string",
+      "phoneNumber": "string",
+      "address": "string"
+    },
+    "customer": {
+      "id": "string",
+      "name": "string",
+      "phoneNumber": "string",
+      "address": "string"
+    },
+    "billDetails": [
+      {
+        "id": "string",
+        "billId": "string",
+        "product": {
+          "id": "string",
+          "name": "string",
+          "price": int,
+          "unit": "string" (satuan product,cth: Buah atau Kg)
+        },
+        "productPrice": int,
+        "qty": int
+      }
+    ],
+    "totalBill": int
+  }
 }
 ```
 
@@ -431,24 +446,40 @@ Response :
 ```json
 {
 	"message": "string",
-	"data":  [
-		{
-			"id":  "string",
-			"billDate":  "string",
-			"entryDate":  "string",
-			"finishDate":  "string",
-			"employeeId":  "string",
-			"customerId":  "string",
-			"billDetails":  [
-				{
-					"id":	"string",
-					"billId":  "string",
-					"productId":  "string",
-					"productPrice": int,
-					"qty": int
-				}
-			]
-		}
-	]
+  "data": [
+    {
+      "id": "string",
+      "billDate": "string",
+      "entryDate": "string",
+      "finishDate": "string",
+      "employee": {
+        "id": "string",
+        "name": "string",
+        "phoneNumber": "string",
+        "address": "string"
+      },
+      "customer": {
+        "id": "string",
+        "name": "string",
+        "phoneNumber": "string",
+        "address": "string"
+      },
+      "billDetails": [
+        {
+          "id": "string",
+          "billId": "string",
+          "product": {
+            "id": "string",
+            "name": "string",
+            "price": int,
+            "unit": "string" (satuan product,cth: Buah atau Kg)
+          },
+          "productPrice": int,
+          "qty": int
+        }
+      ],
+      "totalBill": int
+    }
+  ]
 }
 ```
