@@ -10,9 +10,9 @@ Fitur-fitur yang diminta oleh manajemen EL adalah:
 
 1.  Struktur/Design Database yang memenuhi kaidah normalisasi berdasarkan nota dibawah ini dengan kriteria sbb :
 
-        - Hasil design dalam bentuk file Script DDL Postgre SQL
-        - Design database minimal memiliki 2 tabel master dan 1 tabel transaksi
-        - Sediakan sample data dalam bentuk Script DML Postgre SQL
+        - Hasil design dalam bentuk file Script DDL Postgre SQL ✅
+        - Design database minimal memiliki 2 tabel master dan 1 tabel transaksi ✅
+        - Sediakan sample data dalam bentuk Script DML Postgre SQL ✅
 
 2.  Aplikasi berbasis API menggunakan bahasa pemrograman Golang dengan kriteria sbb :
 
@@ -27,13 +27,13 @@ Fitur-fitur yang diminta oleh manajemen EL adalah:
 
 3.  Dokumentasi cara menjalankan aplikasi dan penggunaan aplikasi dalam bentuk readme.md atau dokumen ektensi word atau pdf
 
-- - -
+---
 
 ## API Spec
 
 ### Customer API
 
-#### Create Customer
+#### Create Customer ✅
 
 Request :
 
@@ -69,7 +69,7 @@ Response :
 }
 ```
 
-#### Get Customer
+#### Get Customer ✅
 
 Request :
 
@@ -95,7 +95,7 @@ Response :
 }
 ```
 
-#### Update Customer
+#### Update Customer ✅
 
 Request :
 
@@ -131,12 +131,134 @@ Response :
 }
 ```
 
-#### Delete Customer
+#### Delete Customer ✅
 
 Request :
 
 - Method : DELETE
 - Endpoint : `/customers/:id`
+- Header :
+  - Accept : application/json
+- Body :
+
+Response :
+
+- Status : 200 OK
+- Body :
+
+```json
+{
+  "message": "string",
+  "data": "OK"
+}
+```
+
+### Employee API
+
+#### Create Employee
+
+Request :
+
+- Method : `POST`
+- Endpoint : `/employees`
+- Header :
+  - Content-Type : application/json
+  - Accept : application/json
+- Body :
+
+```json
+{
+  "name": "string",
+  "phoneNumber": "string",
+  "address": "string"
+}
+```
+
+Response :
+
+- Status : 201 Created
+- Body :
+
+```json
+{
+  "message": "string",
+  "data": {
+    "id": "string",
+    "name": "string",
+    "phoneNumber": "string",
+    "address": "string"
+  }
+}
+```
+
+#### Get Employee
+
+Request :
+
+- Method : GET
+- Endpoint : `/employees/:id`
+- Header :
+  - Accept : application/json
+
+Response :
+
+- Status : 200 OK
+- Body :
+
+```json
+{
+  "message": "string",
+  "data": {
+    "id": "string",
+    "name": "string",
+    "phoneNumber": "string",
+    "address": "string"
+  }
+}
+```
+
+#### Update Employee
+
+Request :
+
+- Method : PUT
+- Endpoint : `/employees/:id`
+- Header :
+  - Content-Type : application/json
+  - Accept : application/json
+- Body :
+
+```json
+{
+  "name": "string",
+  "phoneNumber": "string",
+  "address": "string"
+}
+```
+
+Response :
+
+- Status : 200 OK
+- Body :
+
+```json
+{
+  "message": "string",
+  "data": {
+    "id": "string",
+    "name": "string",
+    "phoneNumber": "string",
+    "address": "string"
+  }
+}
+```
+
+#### Delete Employee
+
+Request :
+
+- Method : DELETE
+- Endpoint : `/employees/:id`
 - Header :
   - Accept : application/json
 - Body :
