@@ -155,7 +155,7 @@ Response :
 
 ### Employee API
 
-#### Create Employee
+#### Create Employee ✅
 
 Request :
 
@@ -191,7 +191,7 @@ Response :
 }
 ```
 
-#### Get Employee
+#### Get Employee ✅
 
 Request :
 
@@ -217,7 +217,7 @@ Response :
 }
 ```
 
-#### Update Employee
+#### Update Employee ✅
 
 Request :
 
@@ -253,7 +253,7 @@ Response :
 }
 ```
 
-#### Delete Employee
+#### Delete Employee ✅
 
 Request :
 

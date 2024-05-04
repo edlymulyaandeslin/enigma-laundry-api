@@ -14,11 +14,11 @@ var db = config.ConnectDb()
 
 func main() {
 	// Tulis kode kamu disini
-
 	defer db.Close()
 
 	router := gin.Default()
 
+	// api customers
 	customerRouter := router.Group("/customers")
 	{
 		customerRouter.GET("/", getAllCustomer)
@@ -28,6 +28,7 @@ func main() {
 		customerRouter.DELETE("/:id", deletedCustomer)
 	}
 
+	// api employee
 	employeeRouter := router.Group("/employees")
 	{
 		employeeRouter.GET("/", getAllEmployee)
@@ -35,6 +36,15 @@ func main() {
 		employeeRouter.POST("/", createEmployee)
 		employeeRouter.PUT("/:id", updatedEmployee)
 		employeeRouter.DELETE("/:id", deletedEmployee)
+	}
+
+	productRouter := router.Group("/products")
+	{
+		productRouter.GET("/", getAllProduct)
+		productRouter.GET("/:id", getProductById)
+		productRouter.POST("/", createProduct)
+		productRouter.PUT("/:id", updatedProduct)
+		productRouter.DELETE("/:id", deletedProduct)
 	}
 
 	router.Run(":3000")
@@ -365,9 +375,9 @@ func deletedEmployee(c *gin.Context) {
 		return
 	}
 
-	findCSQuery := "SELECT * FROM mst_employee WHERE id = $1"
+	findEMQuery := "SELECT * FROM mst_employee WHERE id = $1"
 	var employee entity.Employee
-	err = db.QueryRow(findCSQuery, employeeId).Scan(&employee.Id, &employee.Name, &employee.PhoneNumber, &employee.Address)
+	err = db.QueryRow(findEMQuery, employeeId).Scan(&employee.Id, &employee.Name, &employee.PhoneNumber, &employee.Address)
 
 	// cek apakah employee ditemukan atau tidak
 	if err != nil {
@@ -386,6 +396,180 @@ func deletedEmployee(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Employee deleted successfully",
+		})
+	}
+}
+
+// product function
+func getAllProduct(c *gin.Context) {
+	query := "SELECT * FROM mst_product"
+
+	rows, err := db.Query(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	defer rows.Close()
+
+	products := []entity.Product{}
+	for rows.Next() {
+		var product entity.Product
+		err := rows.Scan(&product.Id, &product.Name, &product.Price, &product.Unit)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
+
+		products = append(products, product)
+	}
+
+	if len(products) > 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "get all products success",
+			"data":    products,
+		})
+	} else {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Product not found"})
+	}
+}
+
+func getProductById(c *gin.Context) {
+	id := c.Param("id")
+
+	productId, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id format"})
+		return
+	}
+
+	query := "SELECT * FROM mst_product WHERE id =  $1"
+
+	product := entity.Product{}
+	err = db.QueryRow(query, productId).Scan(&product.Id, &product.Name, &product.Price, &product.Unit)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Product not found",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "get product by id success",
+		"data":    product,
+	})
+}
+
+func createProduct(c *gin.Context) {
+	newProduct := entity.Product{}
+
+	err := c.ShouldBind(&newProduct)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	queryInsert := "INSERT INTO mst_product (name, price, unit) VALUES ($1, $2, $3) RETURNING id"
+
+	var productId int
+	err = db.QueryRow(queryInsert, newProduct.Name, newProduct.Price, newProduct.Unit).Scan(&productId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product"})
+		return
+	}
+
+	newProduct.Id = productId
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Product created successfully",
+		"data":    newProduct,
+	})
+}
+
+func updatedProduct(c *gin.Context) {
+	id := c.Param("id")
+
+	productId, err := strconv.Atoi(id)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id format"})
+		return
+	}
+
+	findProductQuery := "SELECT * FROM mst_product WHERE id = $1"
+	var product entity.Product
+	err = db.QueryRow(findProductQuery, productId).Scan(&product.Id, &product.Name, &product.Price, &product.Unit)
+
+	// cek apakah product ditemukan atau tidak
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Product not found",
+		})
+		return
+	}
+
+	var productUpdate entity.Product
+	err = c.ShouldBind(&productUpdate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if strings.TrimSpace(productUpdate.Name) == "" {
+		productUpdate.Name = product.Name
+	}
+	if productUpdate.Price == 0 {
+		productUpdate.Price = product.Price
+	}
+	if strings.TrimSpace(productUpdate.Unit) == "" {
+		productUpdate.Unit = product.Unit
+	}
+
+	queryUpdate := "UPDATE mst_product SET name = $1, price = $2, unit = $3 WHERE id = $4"
+	_, err = db.Exec(queryUpdate, productUpdate.Name, productUpdate.Price, productUpdate.Unit, productId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to update product",
+		})
+	} else {
+		productUpdate.Id = productId
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Product updated successfully",
+			"data":    productUpdate,
+		})
+	}
+}
+
+func deletedProduct(c *gin.Context) {
+	id := c.Param("id")
+
+	productId, err := strconv.Atoi(id)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id format"})
+		return
+	}
+
+	findProductQuery := "SELECT * FROM mst_product WHERE id = $1"
+	var product entity.Product
+	err = db.QueryRow(findProductQuery, productId).Scan(&product.Id, &product.Name, &product.Price, &product.Unit)
+
+	// cek apakah product ditemukan atau tidak
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Product not found",
+		})
+		return
+	}
+
+	queryDelete := "DELETE FROM mst_product WHERE id = $1"
+	_, err = db.Exec(queryDelete, productId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to delete product",
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Product deleted successfully",
 		})
 	}
 }
