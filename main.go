@@ -39,6 +39,7 @@ func main() {
 		employeeRouter.DELETE("/:id", deletedEmployee)
 	}
 
+	// api products
 	productRouter := router.Group("/products")
 	{
 		productRouter.GET("/", getAllProduct)
@@ -48,6 +49,7 @@ func main() {
 		productRouter.DELETE("/:id", deletedProduct)
 	}
 
+	// api transaction
 	transactionRouter := router.Group("/transactions")
 	{
 		transactionRouter.GET("/", getAllTrx)
