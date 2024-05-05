@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 	"strings"
@@ -402,9 +403,20 @@ func deletedEmployee(c *gin.Context) {
 
 // product function
 func getAllProduct(c *gin.Context) {
+	productName := c.Query("product_name")
+
 	query := "SELECT * FROM mst_product"
 
-	rows, err := db.Query(query)
+	var rows *sql.Rows
+	var err error
+
+	if productName != "" {
+		query += " WHERE name ILIKE '%' || $1 || '%'"
+		rows, err = db.Query(query, productName)
+	} else {
+		rows, err = db.Query(query)
+	}
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
