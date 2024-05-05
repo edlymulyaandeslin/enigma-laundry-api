@@ -5,6 +5,6 @@ type Transaction struct {
 	BillDate   string `json:"billDate"`
 	EntryDate  string `json:"entryDate"`
 	FinishDate string `json:"finishDate"`
-	EmployeeId int    `json:"employeId"`
+	EmployeeId int    `json:"employeeId"`
 	CustomerId int    `json:"customerId"`
 }

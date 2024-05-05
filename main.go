@@ -48,7 +48,300 @@ func main() {
 		productRouter.DELETE("/:id", deletedProduct)
 	}
 
+	transactionRouter := router.Group("/transactions")
+	{
+		transactionRouter.GET("/", getAllTrx)
+		transactionRouter.GET("/:id_bill", getTrxById)
+		transactionRouter.POST("/", transaction)
+	}
+
 	router.Run(":3000")
+}
+
+// form yang harus di isi user
+type Form struct {
+	BillDate   string `json:"billDate"`
+	EntryDate  string `json:"entryDate"`
+	FinishDate string `json:"finishDate"`
+	EmployeeId int    `json:"employeeId"`
+	CustomerId int    `json:"customerId"`
+	ProductId  int    `json:"productId"`
+	Qty        int    `json:"qty"`
+}
+
+// transaction function
+// get all transaction
+func getAllTrx(c *gin.Context) {
+
+	entryDate := c.Query("entry_date")
+
+	finishDate := c.Query("finish_date")
+	productName := c.Query("product_name")
+
+	query := "SELECT * FROM transactions"
+
+	var rows *sql.Rows
+	var err error
+
+	if entryDate != "" {
+		query += " WHERE entry_date ILIKE '%' || $1 || '%'"
+		rows, err = db.Query(query, entryDate)
+	} else if finishDate != "" {
+		query += " WHERE finish_date ILIKE '%' || $1 || '%'"
+		rows, err = db.Query(query, finishDate)
+	} else if productName != "" {
+		query += " JOIN trx_detail ON transactions.id = trx_detail.trx_id JOIN mst_product ON trx_detail.product_id = mst_product.id WHERE mst_product.name = $1"
+		rows, err = db.Query(query, productName)
+	} else {
+		rows, err = db.Query(query)
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	defer rows.Close()
+
+	var transactions = []gin.H{}
+	for rows.Next() {
+		var transaction entity.Transaction
+		err := rows.Scan(&transaction.Id, &transaction.BillDate, &transaction.EntryDate, &transaction.FinishDate, &transaction.EmployeeId, &transaction.CustomerId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
+
+		var employee entity.Employee
+		query2 := "SELECT * FROM mst_employee WHERE id = $1"
+		db.QueryRow(query2, transaction.EmployeeId).Scan(&employee.Id, &employee.Name, &employee.PhoneNumber, &employee.Address)
+
+		var customer entity.Customer
+		query3 := "SELECT * FROM mst_customer WHERE id = $1"
+		db.QueryRow(query3, transaction.CustomerId).Scan(&customer.Id, &customer.Name, &customer.PhoneNumber, &customer.Address)
+
+		query4 := "SELECT * FROM trx_detail WHERE trx_id = $1"
+		rows2, err := db.Query(query4, transaction.Id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
+		defer rows2.Close()
+
+		var trxDetail []entity.TrxDetail
+		total := 0
+		for rows2.Next() {
+			var detail entity.TrxDetail
+			err := rows2.Scan(&detail.Id, &detail.TrxId, &detail.ProductId, &detail.ProductPrice, &detail.Qty)
+			total += detail.ProductPrice * detail.Qty
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+				return
+			}
+			trxDetail = append(trxDetail, detail)
+		}
+
+		// transactions = append(transactions, transaction)
+		data := gin.H{
+			"id":          transaction.Id,
+			"billDate":    transaction.BillDate,
+			"entryDate":   transaction.EntryDate,
+			"finishDate":  transaction.FinishDate,
+			"employee":    employee,
+			"customer":    customer,
+			"billDetails": trxDetail,
+			"totalBill":   total,
+		}
+
+		transactions = append(transactions, data)
+	}
+	if len(transactions) > 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Get all transactions success",
+			"data":    transactions,
+		})
+	} else {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Transactions not found"})
+	}
+}
+
+// get transaction by id
+func getTrxById(c *gin.Context) {
+	id := c.Param("id_bill")
+
+	billId, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id format"})
+		return
+	}
+
+	// find transaction
+	var transaction entity.Transaction
+	query := "SELECT * FROM transactions WHERE id = $1"
+	err = db.QueryRow(query, billId).Scan(&transaction.Id, &transaction.BillDate, &transaction.EntryDate, &transaction.FinishDate, &transaction.EmployeeId, &transaction.CustomerId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Transactions not found",
+		})
+		return
+	}
+
+	var employee entity.Employee
+	query2 := "SELECT * FROM mst_employee WHERE id = $1"
+	db.QueryRow(query2, transaction.EmployeeId).Scan(&employee.Id, &employee.Name, &employee.PhoneNumber, &employee.Address)
+
+	var customer entity.Customer
+	query3 := "SELECT * FROM mst_customer WHERE id = $1"
+	db.QueryRow(query3, transaction.CustomerId).Scan(&customer.Id, &customer.Name, &customer.PhoneNumber, &customer.Address)
+
+	query4 := "SELECT * FROM trx_detail WHERE trx_id = $1"
+	rows, err := db.Query(query4, billId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	defer rows.Close()
+
+	var trxDetail []entity.TrxDetail
+	total := 0
+	for rows.Next() {
+		var detail entity.TrxDetail
+		err := rows.Scan(&detail.Id, &detail.TrxId, &detail.ProductId, &detail.ProductPrice, &detail.Qty)
+		total += detail.ProductPrice * detail.Qty
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
+
+		trxDetail = append(trxDetail, detail)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "get transaction by id success",
+		"data": gin.H{
+			"id":          transaction.Id,
+			"billDate":    transaction.BillDate,
+			"entryDate":   transaction.EntryDate,
+			"finishDate":  transaction.FinishDate,
+			"employee":    employee,
+			"customer":    customer,
+			"billDetails": trxDetail,
+			"totalBill":   total,
+		},
+	})
+}
+
+// new transaction
+func transaction(c *gin.Context) {
+	var newTransaction entity.Transaction
+	var newTrxDetail entity.TrxDetail
+
+	var form Form
+
+	tx, err := db.Begin()
+
+	if err = c.ShouldBind(&form); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	newTransaction.BillDate = form.BillDate
+	newTransaction.EntryDate = form.EntryDate
+	newTransaction.FinishDate = form.FinishDate
+	newTransaction.EmployeeId = form.EmployeeId
+	newTransaction.CustomerId = form.CustomerId
+
+	newTrxDetail.ProductId = form.ProductId
+	newTrxDetail.Qty = form.Qty
+
+	// create newTrx
+	trxId := createTrx(tx, newTransaction, c)
+
+	// create detail newTrx
+	trxDetailId, productId := createDetailTrx(tx, newTrxDetail, trxId, c)
+
+	// update Transaction
+	productPrice := updateTrx(tx, trxDetailId, productId, c)
+
+	err = tx.Commit()
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "telor"})
+		return
+	} else {
+		newTransaction.Id = trxId
+		newTrxDetail.Id = trxDetailId
+
+		c.JSON(http.StatusCreated, gin.H{
+			"message": "New transaction created",
+			"data": gin.H{
+				"id":         newTransaction.Id,
+				"billDate":   newTransaction.BillDate,
+				"entryDate":  newTransaction.EntryDate,
+				"finishDate": newTransaction.FinishDate,
+				"employeeId": newTransaction.EmployeeId,
+				"customerId": newTransaction.CustomerId,
+				"billDetail": []gin.H{
+					{
+						"id":           newTrxDetail.Id,
+						"billId":       trxId,
+						"productId":    newTrxDetail.ProductId,
+						"productPrice": productPrice,
+						"qty":          newTrxDetail.Qty,
+					},
+				},
+			},
+		})
+	}
+}
+func createTrx(tx *sql.Tx, newTransaction entity.Transaction, c *gin.Context) int {
+	query1 := "INSERT INTO transactions (bill_date, entry_date, finish_date, employe_id, customer_id) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+
+	var trxId int
+	err := tx.QueryRow(query1, newTransaction.BillDate, newTransaction.EntryDate, newTransaction.FinishDate, newTransaction.EmployeeId, newTransaction.CustomerId).Scan(&trxId)
+	if err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	return trxId
+}
+func createDetailTrx(tx *sql.Tx, newTrxDetail entity.TrxDetail, trxId int, c *gin.Context) (int, int) {
+	// insert transaction detail
+	query2 := "INSERT INTO trx_detail (trx_id, product_id, product_price, qty) VALUES ($1, $2, $3, $4) RETURNING id, product_id"
+
+	var trxDetailId, product_id int
+	productPrice := 0
+	err := tx.QueryRow(query2, trxId, newTrxDetail.ProductId, productPrice, newTrxDetail.Qty).Scan(&trxDetailId, &product_id)
+
+	if err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	return trxDetailId, product_id
+}
+func updateTrx(tx *sql.Tx, trxDetailId int, productId int, c *gin.Context) int {
+	// find product
+	queryFindProduct := "SELECT * FROM mst_product WHERE id = $1"
+
+	var product entity.Product
+	err := tx.QueryRow(queryFindProduct, productId).Scan(&product.Id, &product.Name, &product.Price, &product.Unit)
+	if err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+	}
+
+	// update price detail trx
+	productPrice := product.Price
+	query3 := "UPDATE trx_detail SET product_price = $1 WHERE id = $2"
+	_, err = tx.Exec(query3, productPrice, trxDetailId)
+	if err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	return productPrice
 }
 
 // customer function

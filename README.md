@@ -435,7 +435,7 @@ Response :
 
 ### Transaction API
 
-#### Create Transaction
+#### Create Transaction ✅
 
 Request :
 
@@ -490,7 +490,7 @@ Request :
 }
 ```
 
-#### Get Transaction
+#### Get Transaction ✅
 
 Request :
 
@@ -555,9 +555,9 @@ Request :
 - Header :
   - Accept : application/json
 - Query Param :
-  - startDate : string `optional`
-  - endDate : string `optional`
-  - productName : string `optional`
+  - startDate : string `optional` ✅
+  - endDate : string `optional`✅
+  - productName : string `optional` ❌
 - Body :
 
 Response :
