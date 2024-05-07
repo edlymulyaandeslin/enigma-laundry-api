@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -76,11 +77,12 @@ type Form struct {
 func getAllTrx(c *gin.Context) {
 
 	entryDate := c.Query("entry_date")
-
 	finishDate := c.Query("finish_date")
 	productName := c.Query("product_name")
 
-	query := "SELECT * FROM transactions"
+	fmt.Println("product name", productName)
+
+	query := "SELECT transactions.id, bill_date, entry_date, finish_date  , employe_id, customer_id FROM transactions"
 
 	var rows *sql.Rows
 	var err error
