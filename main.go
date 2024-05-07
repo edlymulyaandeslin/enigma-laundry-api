@@ -94,7 +94,7 @@ func getAllTrx(c *gin.Context) {
 		query += " WHERE finish_date ILIKE '%' || $1 || '%'"
 		rows, err = db.Query(query, finishDate)
 	} else if productName != "" {
-		query += " JOIN trx_detail ON transactions.id = trx_detail.trx_id JOIN mst_product ON trx_detail.product_id = mst_product.id WHERE mst_product.name = $1"
+		query += " JOIN trx_detail ON transactions.id = trx_detail.trx_id JOIN mst_product ON trx_detail.product_id = mst_product.id WHERE mst_product.name ILIKE '%' || $1 || '%'"
 		rows, err = db.Query(query, productName)
 	} else {
 		rows, err = db.Query(query)
